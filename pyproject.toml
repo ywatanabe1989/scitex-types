@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "scitex-types"
+version = "0.1.0"
+description = "Scientific type definitions (ArrayLike, ColorLike) and validation"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Yusuke Watanabe" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+numpy = ["numpy"]
+pandas = ["pandas"]
+xarray = ["xarray"]
+torch = ["torch"]
+all = ["numpy", "pandas", "xarray", "torch"]
+
+[project.urls]
+Homepage = "https://github.com/ywatanabe1989/scitex-types"
+Repository = "https://github.com/ywatanabe1989/scitex-types"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/scitex_types"]
