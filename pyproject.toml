@@ -40,6 +40,9 @@ Repository = "https://github.com/ywatanabe1989/scitex-types"
 [project.entry-points."scitex_dev.docs"]
 scitex-types = "scitex_types"
 
+[project.entry-points."scitex_dev.skills"]
+scitex-types = "scitex_types"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/scitex_types"]
 
