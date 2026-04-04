@@ -31,7 +31,7 @@ pandas = ["pandas"]
 xarray = ["xarray"]
 torch = ["torch"]
 all = ["numpy", "pandas", "xarray", "torch"]
-dev = ["pytest", "pytest-cov"]
+dev = ["pytest", "pytest-cov", "numpy"]
 
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/scitex-types"
