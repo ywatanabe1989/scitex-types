@@ -7,16 +7,20 @@ name = "scitex-types"
 version = "0.1.0"
 description = "Scientific type definitions (ArrayLike, ColorLike) and validation"
 readme = "README.md"
-license = "MIT"
-requires-python = ">=3.9"
+license = "AGPL-3.0"
+requires-python = ">=3.10"
 authors = [
     { name = "Yusuke Watanabe" },
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Typing :: Typed",
 ]
 dependencies = []
@@ -27,10 +31,25 @@ pandas = ["pandas"]
 xarray = ["xarray"]
 torch = ["torch"]
 all = ["numpy", "pandas", "xarray", "torch"]
+dev = ["pytest", "pytest-cov"]
 
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/scitex-types"
 Repository = "https://github.com/ywatanabe1989/scitex-types"
 
+[project.entry-points."scitex_dev.docs"]
+scitex-types = "scitex_types"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/scitex_types"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-x -q"
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
