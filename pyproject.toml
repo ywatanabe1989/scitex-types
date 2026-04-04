@@ -36,6 +36,7 @@ dev = ["pytest", "pytest-cov"]
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/scitex-types"
 Repository = "https://github.com/ywatanabe1989/scitex-types"
+Issues = "https://github.com/ywatanabe1989/scitex-types/issues"
 
 [project.entry-points."scitex_dev.docs"]
 scitex-types = "scitex_types"
@@ -51,7 +52,7 @@ testpaths = ["tests"]
 addopts = "-x -q"
 
 [tool.ruff]
-line-length = 79
+line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
