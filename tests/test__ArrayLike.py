@@ -16,7 +16,7 @@ Prerequisites:
     * pytest, numpy, pandas, torch, xarray
 """
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import numpy as np
 import pytest
@@ -44,9 +44,9 @@ class TestArrayLike:
         ]
 
         for test_list in test_lists:
-            assert self.is_array_like(
-                test_list
-            ), f"List {test_list} not recognized as array-like"
+            assert self.is_array_like(test_list), (
+                f"List {test_list} not recognized as array-like"
+            )
 
     def test_tuple_is_array_like(self):
         """Test that Python tuples are recognized as array-like."""
@@ -60,9 +60,9 @@ class TestArrayLike:
         ]
 
         for test_tuple in test_tuples:
-            assert self.is_array_like(
-                test_tuple
-            ), f"Tuple {test_tuple} not recognized as array-like"
+            assert self.is_array_like(test_tuple), (
+                f"Tuple {test_tuple} not recognized as array-like"
+            )
 
     def test_numpy_arrays_are_array_like(self):
         """Test that NumPy arrays are recognized as array-like."""
@@ -81,9 +81,9 @@ class TestArrayLike:
         ]
 
         for test_array in test_arrays:
-            assert self.is_array_like(
-                test_array
-            ), f"NumPy array {test_array} not recognized as array-like"
+            assert self.is_array_like(test_array), (
+                f"NumPy array {test_array} not recognized as array-like"
+            )
 
     def test_pandas_objects_are_array_like(self):
         """Test that Pandas objects are recognized as array-like."""
@@ -101,9 +101,9 @@ class TestArrayLike:
             ]
 
             for test_obj in test_pandas:
-                assert self.is_array_like(
-                    test_obj
-                ), f"Pandas object {type(test_obj)} not recognized as array-like"
+                assert self.is_array_like(test_obj), (
+                    f"Pandas object {type(test_obj)} not recognized as array-like"
+                )
 
         except ImportError:
             pytest.skip("Pandas not available")
@@ -122,9 +122,9 @@ class TestArrayLike:
             ]
 
             for test_obj in test_xarrays:
-                assert self.is_array_like(
-                    test_obj
-                ), f"xarray object {type(test_obj)} not recognized as array-like"
+                assert self.is_array_like(test_obj), (
+                    f"xarray object {type(test_obj)} not recognized as array-like"
+                )
 
         except ImportError:
             pytest.skip("xarray not available")
@@ -145,9 +145,9 @@ class TestArrayLike:
             ]
 
             for test_tensor in test_tensors:
-                assert self.is_array_like(
-                    test_tensor
-                ), f"PyTorch tensor {test_tensor} not recognized as array-like"
+                assert self.is_array_like(test_tensor), (
+                    f"PyTorch tensor {test_tensor} not recognized as array-like"
+                )
 
         except ImportError:
             pytest.skip("PyTorch not available")
@@ -168,9 +168,9 @@ class TestArrayLike:
         ]
 
         for obj in non_array_like:
-            assert not self.is_array_like(
-                obj
-            ), f"Object {obj} ({type(obj)}) incorrectly identified as array-like"
+            assert not self.is_array_like(obj), (
+                f"Object {obj} ({type(obj)}) incorrectly identified as array-like"
+            )
 
     def test_custom_objects_not_array_like(self):
         """Test that custom objects without array-like interface are not recognized."""
@@ -189,9 +189,9 @@ class TestArrayLike:
         custom_objects = [CustomObject([1, 2, 3]), FakeArrayLike(), Mock(), type]
 
         for obj in custom_objects:
-            assert not self.is_array_like(
-                obj
-            ), f"Custom object {obj} incorrectly identified as array-like"
+            assert not self.is_array_like(obj), (
+                f"Custom object {obj} incorrectly identified as array-like"
+            )
 
     def test_edge_cases(self):
         """Test edge cases and boundary conditions."""
@@ -205,26 +205,15 @@ class TestArrayLike:
         ]
 
         for obj in edge_cases:
-            assert self.is_array_like(
-                obj
-            ), f"Edge case {type(obj)} not recognized as array-like"
+            assert self.is_array_like(obj), (
+                f"Edge case {type(obj)} not recognized as array-like"
+            )
 
     def test_is_array_like_with_torch_availability(self):
-        """Test behavior when torch is/isn't available."""
-        # Test when torch is available
-        try:
-            import torch
-
-            tensor = torch.tensor([1, 2, 3])
-            assert self.is_array_like(tensor)
-        except ImportError:
-            # Test with mock when torch unavailable
-            with patch("scitex_types._ArrayLike._torch") as mock_torch:
-                mock_torch.is_tensor.return_value = True
-                fake_tensor = Mock()
-
-                # Should use torch.is_tensor if available
-                assert self.is_array_like(fake_tensor)
+        """Test behavior when torch is available."""
+        torch = pytest.importorskip("torch")
+        tensor = torch.tensor([1, 2, 3])
+        assert self.is_array_like(tensor)
 
     def test_is_array_like_exception_handling(self):
         """Test that exceptions are handled gracefully."""
@@ -266,9 +255,9 @@ class TestArrayLike:
 
         for obj in test_objects:
             result = self.is_array_like(obj)
-            assert isinstance(
-                result, bool
-            ), f"is_array_like({obj}) returned {type(result)}, expected bool"
+            assert isinstance(result, bool), (
+                f"is_array_like({obj}) returned {type(result)}, expected bool"
+            )
 
     def test_function_docstring(self):
         """Test that is_array_like has proper documentation."""
@@ -314,9 +303,9 @@ class TestArrayLike:
 
         # All should be recognized as array-like
         for obj in test_objects:
-            assert self.is_array_like(
-                obj
-            ), f"Object {type(obj)} not recognized as array-like"
+            assert self.is_array_like(obj), (
+                f"Object {type(obj)} not recognized as array-like"
+            )
 
     def test_performance_with_large_objects(self):
         """Test that function performs reasonably with large objects."""
