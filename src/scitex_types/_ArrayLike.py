@@ -30,6 +30,14 @@ except ImportError:
     XARRAY_AVAILABLE = False
     _xr = None
 
+try:
+    import torch as _torch
+
+    TORCH_AVAILABLE = True
+except ImportError:
+    TORCH_AVAILABLE = False
+    _torch = None
+
 
 def _get_torch_tensor_type():
     """Lazily import torch.Tensor to avoid circular imports."""
