@@ -2,6 +2,8 @@
 
 Scientific type definitions (ArrayLike, ColorLike) and validation utilities.
 
+> **Interfaces:** Python ⭐⭐⭐ (primary) · CLI — · MCP — · Skills ⭐ · Hook — · HTTP —
+
 ## Problem and Solution
 
 
