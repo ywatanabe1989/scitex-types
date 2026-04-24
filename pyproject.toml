@@ -7,7 +7,7 @@ name = "scitex-types"
 version = "0.1.2"
 description = "Scientific type definitions (ArrayLike, ColorLike) and validation"
 readme = "README.md"
-license = "AGPL-3.0"
+license = "AGPL-3.0-only"
 requires-python = ">=3.10"
 authors = [
     { name = "Yusuke Watanabe" },
