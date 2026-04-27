@@ -39,6 +39,7 @@ xarray = [
     "xarray",
 ]
 dev = [
+    "scitex-dev",
     "pytest",
     "pytest-cov",
     "numpy",
