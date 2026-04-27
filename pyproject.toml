@@ -26,12 +26,36 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-numpy = ["numpy"]
-pandas = ["pandas"]
-xarray = ["xarray"]
-torch = ["torch"]
-all = ["numpy", "pandas", "xarray", "torch"]
-dev = ["pytest", "pytest-cov", "numpy"]
+numpy = [
+    "numpy",
+]
+pandas = [
+    "pandas",
+]
+torch = [
+    "torch",
+]
+xarray = [
+    "xarray",
+]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "numpy",
+]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+    "myst-parser>=2.0",
+    "sphinx-copybutton>=0.5",
+    "sphinx-autodoc-typehints>=1.25",
+]
+all = [
+    "scitex-types[numpy]",
+    "scitex-types[pandas]",
+    "scitex-types[torch]",
+    "scitex-types[xarray]",
+]
 
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/scitex-types"
