@@ -1,3 +1,9 @@
+---
+name: python-api
+description: scitex-types — Python API — see file body for details.
+tags: [scitex-types, scitex-package]
+---
+
 <!-- 02_python-api.md -->
 
 # scitex-types — Python API
