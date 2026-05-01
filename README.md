@@ -76,7 +76,9 @@ is_list_of_type([1, "x"], int)     # False
 
 ## Part of SciTeX
 
-`scitex-types` is part of [**SciTeX**](https://scitex.ai).
+`scitex-types` is part of [**SciTeX**](https://scitex.ai). Install via
+the umbrella with `pip install scitex[types]` to use as
+`scitex.types` (Python).
 
 >Four Freedoms for Research
 >
