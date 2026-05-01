@@ -53,7 +53,7 @@ is_list_of_type([1, 2, 3], int)    # True
 
 ## 1 Interfaces
 
-<details>
+<details open>
 <summary><strong>Python API</strong></summary>
 
 <br>
