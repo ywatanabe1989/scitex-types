@@ -249,6 +249,67 @@ class TestArrayLike:
         assert any("list" in name.lower() for name in type_names)
         assert any("tuple" in name.lower() for name in type_names)
 
+    def test_torch_tensor_in_union_when_available(self):
+        """Regression: torch.Tensor must be a member of the ArrayLike union
+        whenever torch is installed (type-time parity with the runtime check)."""
+        torch = pytest.importorskip("torch")
+        from typing import get_args
+
+        from scitex_types import ArrayLike
+
+        args = get_args(ArrayLike)
+        assert torch.Tensor in args, (
+            f"torch.Tensor missing from ArrayLike union: {args}"
+        )
+
+    def test_runtime_and_type_union_agree(self):
+        """is_array_like() must accept exactly the same objects as ArrayLike
+        claims at the type level — no silent divergence."""
+        from typing import get_args
+
+        from scitex_types import ArrayLike
+
+        union_members = get_args(ArrayLike)
+        # Every concrete class in the union should pass is_array_like for
+        # an instance of itself.
+        from typing import List as _List
+        from typing import Tuple as _Tuple
+
+        for cls in union_members:
+            if cls is _List:
+                assert self.is_array_like([1, 2])
+            elif cls is _Tuple:
+                assert self.is_array_like((1, 2))
+            else:
+                # Construct a minimal instance for known classes; skip if not
+                # trivially constructible.
+                try:
+                    if cls.__name__ == "ndarray":
+                        instance = np.array([1])
+                    elif cls.__name__ == "Series":
+                        import pandas as pd
+
+                        instance = pd.Series([1])
+                    elif cls.__name__ == "DataFrame":
+                        import pandas as pd
+
+                        instance = pd.DataFrame({"a": [1]})
+                    elif cls.__name__ == "DataArray":
+                        import xarray as xr
+
+                        instance = xr.DataArray([1])
+                    elif cls.__name__ == "Tensor":
+                        import torch
+
+                        instance = torch.tensor([1])
+                    else:
+                        continue
+                except Exception:
+                    continue
+                assert self.is_array_like(instance), (
+                    f"is_array_like rejects {cls.__name__} which is in ArrayLike union"
+                )
+
     def test_function_return_type(self):
         """Test that is_array_like always returns boolean."""
         test_objects = [[1, 2, 3], "not array", 42, np.array([1, 2]), None]

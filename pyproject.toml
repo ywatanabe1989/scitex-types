@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "scitex-types"
-version = "0.1.2"
+version = "0.1.4"
 description = "Scientific type definitions (ArrayLike, ColorLike) and validation"
 readme = "README.md"
 license = "AGPL-3.0-only"
@@ -15,7 +15,6 @@ authors = [
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -26,17 +25,43 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-numpy = ["numpy"]
-pandas = ["pandas"]
-xarray = ["xarray"]
-torch = ["torch"]
-all = ["numpy", "pandas", "xarray", "torch"]
-dev = ["pytest", "pytest-cov", "numpy"]
+numpy = [
+    "numpy",
+]
+pandas = [
+    "pandas",
+]
+torch = [
+    "torch",
+]
+xarray = [
+    "xarray",
+]
+dev = [
+    "scitex-dev",
+    "pytest",
+    "pytest-cov",
+    "numpy",
+]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme>=2.0",
+    "myst-parser>=2.0",
+    "sphinx-copybutton>=0.5",
+    "sphinx-autodoc-typehints>=1.25",
+]
+all = [
+    "scitex-types[numpy]",
+    "scitex-types[pandas]",
+    "scitex-types[torch]",
+    "scitex-types[xarray]",
+]
 
 [project.urls]
 Homepage = "https://github.com/ywatanabe1989/scitex-types"
 Repository = "https://github.com/ywatanabe1989/scitex-types"
 Issues = "https://github.com/ywatanabe1989/scitex-types/issues"
+Documentation = "https://scitex-types.readthedocs.io"
 
 [project.entry-points."scitex_dev.docs"]
 scitex-types = "scitex_types"
@@ -57,3 +82,6 @@ line-length = 88
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
 ignore = ["E501"]
+
+[tool.scitex-linter]
+library_dirs = ["src", "tests", "examples"]

@@ -1,3 +1,9 @@
+---
+name: quick-start
+description: scitex-types — Quick Start — see file body for details.
+tags: [scitex-types, scitex-package]
+---
+
 <!-- 01_quick-start.md -->
 
 # scitex-types — Quick Start
