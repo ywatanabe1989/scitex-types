@@ -61,6 +61,7 @@ all = [
 Homepage = "https://github.com/ywatanabe1989/scitex-types"
 Repository = "https://github.com/ywatanabe1989/scitex-types"
 Issues = "https://github.com/ywatanabe1989/scitex-types/issues"
+Documentation = "https://scitex-types.readthedocs.io"
 
 [project.entry-points."scitex_dev.docs"]
 scitex-types = "scitex_types"
