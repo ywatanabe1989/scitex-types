@@ -1,7 +1,8 @@
 ---
-name: quick-start
-description: scitex-types — Quick Start — see file body for details.
-tags: [scitex-types, scitex-package]
+description: |
+  [TOPIC] Quick Start
+  [DETAILS] Install, import, and three usage snippets covering type-hint, runtime check, and homogeneous-list check.
+tags: [scitex-types-quick-start]
 ---
 
 <!-- 01_quick-start.md -->
