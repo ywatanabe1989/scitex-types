@@ -38,10 +38,11 @@ xarray = [
     "xarray",
 ]
 dev = [
-    "scitex-dev",
+    "numpy",
     "pytest",
     "pytest-cov",
-    "numpy",
+    "scitex-dev",
+    "xarray",
 ]
 docs = [
     "sphinx>=7.0",
