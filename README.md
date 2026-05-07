@@ -33,6 +33,29 @@
 | 1 | **`numpy.typing.ArrayLike` covers only NumPy** — functions that also accept Torch/DataFrame/Series need a hand-rolled `Union` | **`ArrayLike`, `ColorLike`** — stable aliases spanning `list/tuple/np.ndarray/pd.DataFrame/pd.Series/xr.DataArray/torch.Tensor` + matplotlib color inputs |
 | 2 | **Runtime "is this a list of floats?" is a 3-line comprehension** | **`is_array_like()`, `is_list_of_type(lst, float)`** — clear predicates, no isinstance chain |
 
+## Architecture
+
+```
+scitex_types/
+├── _aliases.py     # ArrayLike, ColorLike unions
+└── _predicates.py  # is_array_like, is_list_of_type
+```
+
+```mermaid
+flowchart LR
+    A[list / tuple] --> AL[ArrayLike]
+    B[np.ndarray] --> AL
+    C[pd.DataFrame / Series] --> AL
+    D[xr.DataArray] --> AL
+    E[torch.Tensor] --> AL
+    AL --> P[is_array_like]
+    F[mpl color string / RGB / RGBA] --> CL[ColorLike]
+    style AL fill:#4a90d9,stroke:#2c3e50,color:#fff
+    style CL fill:#8e44ad,stroke:#2c3e50,color:#fff
+```
+
+<p align="center"><sub><b>Figure 1.</b> Type surface. Two aliases unify common scientific containers and matplotlib color inputs; predicates resolve membership at runtime.</sub></p>
+
 ## Installation
 
 ```bash
@@ -75,6 +98,33 @@ is_list_of_type([1, "x"], int)     # False
 ```
 
 </details>
+
+## Demo
+
+```python
+from scitex_types import ArrayLike, is_array_like, is_list_of_type
+
+def normalize(x: ArrayLike) -> ArrayLike:
+    assert is_array_like(x)
+    return x
+
+normalize([1, 2, 3])             # OK
+normalize("not array")           # AssertionError
+
+is_list_of_type([1, 2, 3], int)  # True — uniform int list
+is_list_of_type([1, "x"], int)   # False — mixed
+```
+
+```mermaid
+flowchart LR
+    Input[Function input] --> Pred{is_array_like?}
+    Pred -- yes --> Proceed[proceed]
+    Pred -- no --> Raise[raise / branch]
+    style Proceed fill:#27ae60,stroke:#2c3e50,color:#fff
+    style Raise fill:#e74c3c,stroke:#2c3e50,color:#fff
+```
+
+<p align="center"><sub><b>Figure 2.</b> Demo. Use <code>ArrayLike</code> in annotations, <code>is_array_like</code> as a one-line guard.</sub></p>
 
 ## Part of SciTeX
 
