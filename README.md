@@ -9,7 +9,7 @@
 <p align="center"><b>Scientific type aliases (ArrayLike, ColorLike) + runtime validation predicates.</b></p>
 
 <p align="center">
-  <a href="https://scitex-types.readthedocs.io/">Full Documentation</a> · <code>pip install scitex-types</code>
+  <a href="https://scitex-types.readthedocs.io/">Full Documentation</a> · <code>uv pip install scitex-types[all]</code>
 </p>
 
 <!-- scitex-badges:start -->
