@@ -18,8 +18,11 @@ Prerequisites:
 
 from unittest.mock import Mock
 
-import numpy as np
 import pytest
+
+# numpy is an optional extra (scitex-types[numpy]), so guard at module-import
+# time (PA-303). Skips the whole file if the user isn't installing [dev].
+np = pytest.importorskip("numpy")
 
 
 class TestArrayLike:

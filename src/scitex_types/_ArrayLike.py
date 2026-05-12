@@ -19,37 +19,19 @@ from typing import List as _List
 from typing import Tuple as _Tuple
 from typing import Union as _Union
 
-try:
-    import numpy as _np
+from scitex_dev import try_import_optional
 
-    NUMPY_AVAILABLE = True
-except ImportError:
-    NUMPY_AVAILABLE = False
-    _np = None
+_np = try_import_optional("numpy", extra="numpy", pkg="scitex-types")
+NUMPY_AVAILABLE = _np is not None
 
-try:
-    import pandas as _pd
+_pd = try_import_optional("pandas", extra="pandas", pkg="scitex-types")
+PANDAS_AVAILABLE = _pd is not None
 
-    PANDAS_AVAILABLE = True
-except ImportError:
-    PANDAS_AVAILABLE = False
-    _pd = None
+_xr = try_import_optional("xarray", extra="xarray", pkg="scitex-types")
+XARRAY_AVAILABLE = _xr is not None
 
-try:
-    import xarray as _xr
-
-    XARRAY_AVAILABLE = True
-except ImportError:
-    XARRAY_AVAILABLE = False
-    _xr = None
-
-try:
-    import torch as _torch
-
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
-    _torch = None
+_torch = try_import_optional("torch", extra="torch", pkg="scitex-types")
+TORCH_AVAILABLE = _torch is not None
 
 
 # Build the union once; reuse for both the type alias and the runtime check.

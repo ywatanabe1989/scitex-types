@@ -22,7 +22,12 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+    # `scitex_dev.try_import_optional` is used by `_ArrayLike` to gate the
+    # optional numpy/pandas/xarray/torch members of the ArrayLike union; the
+    # helper is in scitex-dev's light core (no heavy transitive imports).
+    "scitex-dev",
+]
 
 [project.optional-dependencies]
 numpy = [
@@ -76,6 +81,11 @@ packages = ["src/scitex_types"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-x -q"
+
+[tool.coverage.run]
+parallel = true
+source = ["scitex_types"]
+concurrency = ["multiprocessing", "thread"]
 
 [tool.ruff]
 line-length = 88

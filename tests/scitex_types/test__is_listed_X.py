@@ -17,8 +17,11 @@ Test Structure:
 - Performance considerations
 """
 
-import numpy as np
 import pytest
+
+# numpy is an optional extra (scitex-types[numpy]), so guard at module-import
+# time (PA-303). Skips the whole file if numpy isn't installed.
+np = pytest.importorskip("numpy")
 
 from scitex_types._is_listed_X import is_list_of_type, is_listed_X
 
