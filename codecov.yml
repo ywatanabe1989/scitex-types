@@ -1,0 +1,21 @@
+# Coverage / Codecov configuration for scitex-types.
+#
+# `auto` lets Codecov use the previous coverage as the baseline while the
+# package ramps coverage up to the ecosystem-wide 90% target. Flip to
+# `90%` once the local baseline is comfortably above it.
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false

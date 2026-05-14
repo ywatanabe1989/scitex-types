@@ -1,15 +1,5 @@
 # scitex-types
 
-<!-- scitex-badges:start -->
-[![PyPI](https://img.shields.io/pypi/v/scitex-types.svg)](https://pypi.org/project/scitex-types/)
-[![Python](https://img.shields.io/pypi/pyversions/scitex-types.svg)](https://pypi.org/project/scitex-types/)
-[![Tests](https://github.com/ywatanabe1989/scitex-types/actions/workflows/test.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-types/actions/workflows/test.yml)
-[![Install Test](https://github.com/ywatanabe1989/scitex-types/actions/workflows/install-test.yml/badge.svg)](https://github.com/ywatanabe1989/scitex-types/actions/workflows/install-test.yml)
-[![Coverage](https://codecov.io/gh/ywatanabe1989/scitex-types/graph/badge.svg)](https://codecov.io/gh/ywatanabe1989/scitex-types)
-[![Docs](https://readthedocs.org/projects/scitex-types/badge/?version=latest)](https://scitex-types.readthedocs.io/en/latest/)
-[![License: AGPL v3](https://img.shields.io/badge/license-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-<!-- scitex-badges:end -->
-
 <p align="center">
   <a href="https://scitex.ai">
     <img src="docs/scitex-logo-blue-cropped.png" alt="SciTeX" width="400">
@@ -19,8 +9,19 @@
 <p align="center"><b>Scientific type aliases (ArrayLike, ColorLike) + runtime validation predicates.</b></p>
 
 <p align="center">
-  <a href="https://scitex-types.readthedocs.io/">Full Documentation</a> · <code>pip install scitex-types</code>
+  <a href="https://scitex-types.readthedocs.io/">Full Documentation</a> · <code>uv pip install scitex-types[all]</code>
 </p>
+
+<!-- scitex-badges:start -->
+<p align="center">
+  <a href="https://pypi.org/project/scitex-types/"><img src="https://img.shields.io/pypi/v/scitex-types.svg" alt="PyPI"></a>
+  <a href="https://pypi.org/project/scitex-types/"><img src="https://img.shields.io/pypi/pyversions/scitex-types.svg" alt="Python"></a>
+  <a href="https://github.com/ywatanabe1989/scitex-types/actions/workflows/test.yml"><img src="https://github.com/ywatanabe1989/scitex-types/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
+  <a href="https://codecov.io/gh/ywatanabe1989/scitex-types"><img src="https://codecov.io/gh/ywatanabe1989/scitex-types/graph/badge.svg" alt="Coverage"></a>
+  <a href="https://scitex-types.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/scitex-types/badge/?version=latest" alt="Docs"></a>
+  <a href="https://www.gnu.org/licenses/agpl-3.0"><img src="https://img.shields.io/badge/license-AGPL_v3-blue.svg" alt="License: AGPL v3"></a>
+</p>
+<!-- scitex-badges:end -->
 
 ---
 
@@ -30,6 +31,29 @@
 |---|---------|----------|
 | 1 | **`numpy.typing.ArrayLike` covers only NumPy** — functions that also accept Torch/DataFrame/Series need a hand-rolled `Union` | **`ArrayLike`, `ColorLike`** — stable aliases spanning `list/tuple/np.ndarray/pd.DataFrame/pd.Series/xr.DataArray/torch.Tensor` + matplotlib color inputs |
 | 2 | **Runtime "is this a list of floats?" is a 3-line comprehension** | **`is_array_like()`, `is_list_of_type(lst, float)`** — clear predicates, no isinstance chain |
+
+## Architecture
+
+```
+scitex_types/
+├── _aliases.py     # ArrayLike, ColorLike unions
+└── _predicates.py  # is_array_like, is_list_of_type
+```
+
+```mermaid
+flowchart LR
+    A[list / tuple] --> AL[ArrayLike]
+    B[np.ndarray] --> AL
+    C[pd.DataFrame / Series] --> AL
+    D[xr.DataArray] --> AL
+    E[torch.Tensor] --> AL
+    AL --> P[is_array_like]
+    F[mpl color string / RGB / RGBA] --> CL[ColorLike]
+    style AL fill:#4a90d9,stroke:#2c3e50,color:#fff
+    style CL fill:#8e44ad,stroke:#2c3e50,color:#fff
+```
+
+<p align="center"><sub><b>Figure 1.</b> Type surface. Two aliases unify common scientific containers and matplotlib color inputs; predicates resolve membership at runtime.</sub></p>
 
 ## Installation
 
@@ -53,7 +77,7 @@ is_list_of_type([1, 2, 3], int)    # True
 
 ## 1 Interfaces
 
-<details>
+<details open>
 <summary><strong>Python API</strong></summary>
 
 <br>
@@ -73,6 +97,33 @@ is_list_of_type([1, "x"], int)     # False
 ```
 
 </details>
+
+## Demo
+
+```python
+from scitex_types import ArrayLike, is_array_like, is_list_of_type
+
+def normalize(x: ArrayLike) -> ArrayLike:
+    assert is_array_like(x)
+    return x
+
+normalize([1, 2, 3])             # OK
+normalize("not array")           # AssertionError
+
+is_list_of_type([1, 2, 3], int)  # True — uniform int list
+is_list_of_type([1, "x"], int)   # False — mixed
+```
+
+```mermaid
+flowchart LR
+    Input[Function input] --> Pred{is_array_like?}
+    Pred -- yes --> Proceed[proceed]
+    Pred -- no --> Raise[raise / branch]
+    style Proceed fill:#27ae60,stroke:#2c3e50,color:#fff
+    style Raise fill:#e74c3c,stroke:#2c3e50,color:#fff
+```
+
+<p align="center"><sub><b>Figure 2.</b> Demo. Use <code>ArrayLike</code> in annotations, <code>is_array_like</code> as a one-line guard.</sub></p>
 
 ## Part of SciTeX
 

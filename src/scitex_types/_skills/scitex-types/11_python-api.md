@@ -1,7 +1,8 @@
 ---
-name: python-api
-description: scitex-types — Python API — see file body for details.
-tags: [scitex-types, scitex-package]
+description: |
+  [TOPIC] Python API
+  [DETAILS] All public type aliases (ArrayLike, ColorLike) and runtime predicates (is_array_like, is_list_of_type, is_listed_X) with signatures.
+tags: [scitex-types-python-api]
 ---
 
 <!-- 02_python-api.md -->

@@ -15,3 +15,11 @@ venv/
 .mypy_cache/
 .ruff_cache/
 *.whl
+
+# Coverage data shards (parallel + subprocess mode, see tests/conftest.py).
+.coverage
+.coverage.*
+coverage.xml
+
+# scitex-agent-container output (re-generated per run, not part of the package).
+.claude/
