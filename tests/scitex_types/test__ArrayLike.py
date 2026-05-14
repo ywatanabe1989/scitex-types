@@ -1,22 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Time-stamp: "2025-06-02 15:51:00 (ywatanabe)"
 # File: ./tests/scitex/types/test__ArrayLike.py
 
-"""
-Functionality:
-    * Tests ArrayLike type definition and is_array_like function
-    * Validates recognition of array-like objects from various libraries
-    * Tests edge cases and error handling
-Input:
-    * Various array-like and non-array-like objects
-Output:
-    * Test results
-Prerequisites:
-    * pytest, numpy, pandas, torch, xarray
-"""
-
-from unittest.mock import Mock
+"""Tests for ArrayLike type definition and is_array_like function."""
 
 import pytest
 
@@ -24,468 +10,483 @@ import pytest
 # time (PA-303). Skips the whole file if the user isn't installing [dev].
 np = pytest.importorskip("numpy")
 
+from scitex_types import ArrayLike, is_array_like  # noqa: E402
 
-class TestArrayLike:
-    """Test cases for ArrayLike type and is_array_like function."""
 
-    def setup_method(self):
-        """Setup test fixtures."""
-        from scitex_types import ArrayLike, is_array_like
+def _require_pandas():
+    try:
+        import pandas as pd  # noqa: F401
+    except ImportError:
+        pytest.skip("Pandas not available")
 
-        self.ArrayLike = ArrayLike
-        self.is_array_like = is_array_like
 
-    def test_list_is_array_like(self):
-        """Test that Python lists are recognized as array-like."""
-        test_lists = [
-            [],
-            [1, 2, 3],
-            [1.0, 2.0, 3.0],
-            ["a", "b", "c"],
-            [[1, 2], [3, 4]],
-            [1, "mixed", 3.0],
-        ]
+def _require_xarray():
+    try:
+        import xarray as xr  # noqa: F401
+    except ImportError:
+        pytest.skip("xarray not available")
 
-        for test_list in test_lists:
-            assert self.is_array_like(test_list), (
-                f"List {test_list} not recognized as array-like"
-            )
 
-    def test_tuple_is_array_like(self):
-        """Test that Python tuples are recognized as array-like."""
-        test_tuples = [
-            (),
-            (1, 2, 3),
-            (1.0, 2.0, 3.0),
-            ("a", "b", "c"),
-            ((1, 2), (3, 4)),
-            (1, "mixed", 3.0),
-        ]
+def _require_torch():
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        pytest.skip("PyTorch not available")
 
-        for test_tuple in test_tuples:
-            assert self.is_array_like(test_tuple), (
-                f"Tuple {test_tuple} not recognized as array-like"
-            )
 
-    def test_numpy_arrays_are_array_like(self):
-        """Test that NumPy arrays are recognized as array-like."""
-        import numpy as np
+# ---------------------------------------------------------------------------
+# is_array_like — positive cases (basic Python types)
+# ---------------------------------------------------------------------------
 
-        test_arrays = [
-            np.array([]),
-            np.array([1, 2, 3]),
-            np.array([[1, 2], [3, 4]]),
-            np.zeros((3, 3)),
-            np.ones(5),
-            np.arange(10),
-            np.random.randn(2, 3),
-            np.array(["a", "b", "c"]),
-            np.array([1.0, 2.0, 3.0]),
-        ]
 
-        for test_array in test_arrays:
-            assert self.is_array_like(test_array), (
-                f"NumPy array {test_array} not recognized as array-like"
-            )
+@pytest.mark.parametrize(
+    "test_list",
+    [
+        [],
+        [1, 2, 3],
+        [1.0, 2.0, 3.0],
+        ["a", "b", "c"],
+        [[1, 2], [3, 4]],
+        [1, "mixed", 3.0],
+    ],
+)
+def test_python_list_is_recognized_as_array_like(test_list):
+    # Arrange
+    # Act
+    result = is_array_like(test_list)
+    # Assert
+    assert result, f"List {test_list} not recognized as array-like"
 
-    def test_pandas_objects_are_array_like(self):
-        """Test that Pandas objects are recognized as array-like."""
-        try:
+
+@pytest.mark.parametrize(
+    "test_tuple",
+    [
+        (),
+        (1, 2, 3),
+        (1.0, 2.0, 3.0),
+        ("a", "b", "c"),
+        ((1, 2), (3, 4)),
+        (1, "mixed", 3.0),
+    ],
+)
+def test_python_tuple_is_recognized_as_array_like(test_tuple):
+    # Arrange
+    # Act
+    result = is_array_like(test_tuple)
+    # Assert
+    assert result, f"Tuple {test_tuple} not recognized as array-like"
+
+
+# ---------------------------------------------------------------------------
+# is_array_like — numpy
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "test_array",
+    [
+        np.array([]),
+        np.array([1, 2, 3]),
+        np.array([[1, 2], [3, 4]]),
+        np.zeros((3, 3)),
+        np.ones(5),
+        np.arange(10),
+        np.array(["a", "b", "c"]),
+        np.array([1.0, 2.0, 3.0]),
+    ],
+)
+def test_numpy_array_is_recognized_as_array_like(test_array):
+    # Arrange
+    # Act
+    result = is_array_like(test_array)
+    # Assert
+    assert result, "NumPy array not recognized as array-like"
+
+
+# ---------------------------------------------------------------------------
+# is_array_like — pandas
+# ---------------------------------------------------------------------------
+
+
+def _pandas_objects():
+    import pandas as pd
+
+    return [
+        pd.Series([1, 2, 3]),
+        pd.Series(["a", "b", "c"]),
+        pd.Series([], dtype=float),
+        pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}),
+        pd.DataFrame(),
+        pd.Series(np.arange(10)),
+        pd.DataFrame(np.random.randn(5, 3)),
+    ]
+
+
+@pytest.fixture(params=range(7))
+def pandas_object(request):
+    _require_pandas()
+    return _pandas_objects()[request.param]
+
+
+def test_pandas_object_is_recognized_as_array_like(pandas_object):
+    # Arrange
+    # Act
+    result = is_array_like(pandas_object)
+    # Assert
+    assert result, f"Pandas object {type(pandas_object)} not array-like"
+
+
+# ---------------------------------------------------------------------------
+# is_array_like — xarray
+# ---------------------------------------------------------------------------
+
+
+def _xarray_objects():
+    import xarray as xr
+
+    return [
+        xr.DataArray([1, 2, 3]),
+        xr.DataArray(np.random.randn(3, 4)),
+        xr.DataArray([]),
+        xr.DataArray([[1, 2], [3, 4]], dims=["x", "y"]),
+    ]
+
+
+@pytest.fixture(params=range(4))
+def xarray_object(request):
+    _require_xarray()
+    return _xarray_objects()[request.param]
+
+
+def test_xarray_object_is_recognized_as_array_like(xarray_object):
+    # Arrange
+    # Act
+    result = is_array_like(xarray_object)
+    # Assert
+    assert result, f"xarray object {type(xarray_object)} not array-like"
+
+
+# ---------------------------------------------------------------------------
+# is_array_like — torch
+# ---------------------------------------------------------------------------
+
+
+def _torch_tensors():
+    import torch
+
+    return [
+        torch.tensor([1, 2, 3]),
+        torch.tensor([[1, 2], [3, 4]]),
+        torch.zeros(3, 3),
+        torch.ones(5),
+        torch.randn(2, 3),
+        torch.tensor([1.0, 2.0, 3.0]),
+        torch.empty(0),
+    ]
+
+
+@pytest.fixture(params=range(7))
+def torch_tensor(request):
+    _require_torch()
+    return _torch_tensors()[request.param]
+
+
+def test_torch_tensor_is_recognized_as_array_like(torch_tensor):
+    # Arrange
+    # Act
+    result = is_array_like(torch_tensor)
+    # Assert
+    assert result, "PyTorch tensor not recognized as array-like"
+
+
+def test_torch_tensor_passes_when_torch_available():
+    # Arrange
+    torch = pytest.importorskip("torch")
+    tensor = torch.tensor([1, 2, 3])
+    # Act
+    result = is_array_like(tensor)
+    # Assert
+    assert result
+
+
+# ---------------------------------------------------------------------------
+# is_array_like — negative cases
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "obj",
+    [
+        1,
+        3.14,
+        "string",
+        {"key": "value"},
+        {1, 2, 3},
+        object(),
+        None,
+        True,
+        False,
+    ],
+)
+def test_non_array_object_is_rejected(obj):
+    # Arrange
+    # Act
+    result = is_array_like(obj)
+    # Assert
+    assert not result, f"{obj!r} ({type(obj)}) wrongly identified as array-like"
+
+
+def test_lambda_is_not_array_like():
+    # Arrange
+    fn = lambda x: x  # noqa: E731
+    # Act
+    result = is_array_like(fn)
+    # Assert
+    assert not result
+
+
+class _CustomObject:
+    def __init__(self, data):
+        self.data = data
+
+
+class _FakeArrayLike:
+    def __getitem__(self, key):
+        return key
+
+    def __len__(self):
+        return 5
+
+
+class _GenericObject:
+    """Plain object with no array-like attributes."""
+
+
+@pytest.mark.parametrize(
+    "obj",
+    [
+        _CustomObject([1, 2, 3]),
+        _FakeArrayLike(),
+        _GenericObject(),
+        type,
+    ],
+)
+def test_custom_non_array_object_is_rejected(obj):
+    # Arrange
+    # Act
+    result = is_array_like(obj)
+    # Assert
+    assert not result, f"Custom object {obj} wrongly identified as array-like"
+
+
+# ---------------------------------------------------------------------------
+# Edge cases
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "obj",
+    [
+        [[[1]], [[2]]],
+        (((), ()), ((), ())),
+        list(range(1000)),
+        tuple(range(500)),
+    ],
+)
+def test_nested_or_large_container_is_array_like(obj):
+    # Arrange
+    # Act
+    result = is_array_like(obj)
+    # Assert
+    assert result, f"Edge case {type(obj)} not recognized as array-like"
+
+
+def test_exception_in_object_is_handled_gracefully():
+    # Arrange
+    class ProblematicObject:
+        def __instancecheck__(self, instance):
+            raise RuntimeError("Instance check failed")
+
+    problematic = ProblematicObject()
+    # Act
+    try:
+        result = is_array_like(problematic)
+    except Exception:
+        result = False
+    # Assert
+    assert isinstance(result, bool)
+
+
+# ---------------------------------------------------------------------------
+# ArrayLike type structure
+# ---------------------------------------------------------------------------
+
+
+def test_array_like_union_has_multiple_members():
+    # Arrange
+    from typing import get_args
+
+    # Act
+    args = get_args(ArrayLike)
+    # Assert
+    assert args and len(args) > 1
+
+
+def test_array_like_union_includes_list_type():
+    # Arrange
+    from typing import get_args
+
+    # Act
+    type_names = [str(a).lower() for a in get_args(ArrayLike)]
+    # Assert
+    assert any("list" in name for name in type_names)
+
+
+def test_array_like_union_includes_tuple_type():
+    # Arrange
+    from typing import get_args
+
+    # Act
+    type_names = [str(a).lower() for a in get_args(ArrayLike)]
+    # Assert
+    assert any("tuple" in name for name in type_names)
+
+
+def test_torch_tensor_is_member_of_array_like_union():
+    # Arrange
+    torch = pytest.importorskip("torch")
+    from typing import get_args
+
+    # Act
+    args = get_args(ArrayLike)
+    # Assert
+    assert torch.Tensor in args, f"torch.Tensor missing from ArrayLike: {args}"
+
+
+# ---------------------------------------------------------------------------
+# Runtime / type-union agreement
+# ---------------------------------------------------------------------------
+
+
+def _instance_for_union_member(cls):
+    from typing import List as _List
+    from typing import Tuple as _Tuple
+
+    if cls is _List:
+        return [1, 2]
+    if cls is _Tuple:
+        return (1, 2)
+    name = getattr(cls, "__name__", "")
+    try:
+        if name == "ndarray":
+            return np.array([1])
+        if name == "Series":
             import pandas as pd
 
-            test_pandas = [
-                pd.Series([1, 2, 3]),
-                pd.Series(["a", "b", "c"]),
-                pd.Series([]),
-                pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]}),
-                pd.DataFrame(),
-                pd.Series(np.arange(10)),
-                pd.DataFrame(np.random.randn(5, 3)),
-            ]
-
-            for test_obj in test_pandas:
-                assert self.is_array_like(test_obj), (
-                    f"Pandas object {type(test_obj)} not recognized as array-like"
-                )
-
-        except ImportError:
-            pytest.skip("Pandas not available")
-
-    def test_xarray_objects_are_array_like(self):
-        """Test that xarray objects are recognized as array-like."""
-        try:
-            import numpy as np
-            import xarray as xr
-
-            test_xarrays = [
-                xr.DataArray([1, 2, 3]),
-                xr.DataArray(np.random.randn(3, 4)),
-                xr.DataArray([]),
-                xr.DataArray([[1, 2], [3, 4]], dims=["x", "y"]),
-            ]
-
-            for test_obj in test_xarrays:
-                assert self.is_array_like(test_obj), (
-                    f"xarray object {type(test_obj)} not recognized as array-like"
-                )
-
-        except ImportError:
-            pytest.skip("xarray not available")
-
-    def test_torch_tensors_are_array_like(self):
-        """Test that PyTorch tensors are recognized as array-like."""
-        try:
-            import torch
-
-            test_tensors = [
-                torch.tensor([1, 2, 3]),
-                torch.tensor([[1, 2], [3, 4]]),
-                torch.zeros(3, 3),
-                torch.ones(5),
-                torch.randn(2, 3),
-                torch.tensor([1.0, 2.0, 3.0]),
-                torch.empty(0),
-            ]
-
-            for test_tensor in test_tensors:
-                assert self.is_array_like(test_tensor), (
-                    f"PyTorch tensor {test_tensor} not recognized as array-like"
-                )
-
-        except ImportError:
-            pytest.skip("PyTorch not available")
-
-    def test_non_array_like_objects(self):
-        """Test that non-array-like objects are correctly identified."""
-        non_array_like = [
-            1,
-            3.14,
-            "string",
-            {"key": "value"},
-            set([1, 2, 3]),
-            lambda x: x,
-            object(),
-            None,
-            True,
-            False,
-        ]
-
-        for obj in non_array_like:
-            assert not self.is_array_like(obj), (
-                f"Object {obj} ({type(obj)}) incorrectly identified as array-like"
-            )
-
-    def test_custom_objects_not_array_like(self):
-        """Test that custom objects without array-like interface are not recognized."""
-
-        class CustomObject:
-            def __init__(self, data):
-                self.data = data
-
-        class FakeArrayLike:
-            def __getitem__(self, key):
-                return key
-
-            def __len__(self):
-                return 5
-
-        custom_objects = [CustomObject([1, 2, 3]), FakeArrayLike(), Mock(), type]
-
-        for obj in custom_objects:
-            assert not self.is_array_like(obj), (
-                f"Custom object {obj} incorrectly identified as array-like"
-            )
-
-    def test_edge_cases(self):
-        """Test edge cases and boundary conditions."""
-        edge_cases = [
-            # Nested structures
-            [[[1]], [[2]]],
-            (((), ()), ((), ())),
-            # Very large structures (should still work)
-            list(range(1000)),
-            tuple(range(500)),
-        ]
-
-        for obj in edge_cases:
-            assert self.is_array_like(obj), (
-                f"Edge case {type(obj)} not recognized as array-like"
-            )
-
-    def test_is_array_like_with_torch_availability(self):
-        """Test behavior when torch is available."""
-        torch = pytest.importorskip("torch")
-        tensor = torch.tensor([1, 2, 3])
-        assert self.is_array_like(tensor)
-
-    def test_is_array_like_exception_handling(self):
-        """Test that exceptions are handled gracefully."""
-
-        class ProblematicObject:
-            def __instancecheck__(self, instance):
-                raise RuntimeError("Instance check failed")
-
-        # Should not raise exception, should return False
-        problematic = ProblematicObject()
-        try:
-            result = self.is_array_like(problematic)
-            # Should handle gracefully (likely return False)
-            assert isinstance(result, bool)
-        except:
-            # If it does raise, that's also acceptable behavior
-            pass
-
-    def test_type_definition_structure(self):
-        """Test that ArrayLike type has expected structure."""
-        from typing import get_args, get_origin
-
-        # ArrayLike should be a Union type
-        origin = get_origin(self.ArrayLike)
-        args = get_args(self.ArrayLike)
-
-        # Should have multiple type arguments (for Union)
-        assert args is not None
-        assert len(args) > 1
-
-        # Should include basic Python types
-        type_names = [str(arg) for arg in args]
-        assert any("list" in name.lower() for name in type_names)
-        assert any("tuple" in name.lower() for name in type_names)
-
-    def test_torch_tensor_in_union_when_available(self):
-        """Regression: torch.Tensor must be a member of the ArrayLike union
-        whenever torch is installed (type-time parity with the runtime check)."""
-        torch = pytest.importorskip("torch")
-        from typing import get_args
-
-        from scitex_types import ArrayLike
-
-        args = get_args(ArrayLike)
-        assert torch.Tensor in args, (
-            f"torch.Tensor missing from ArrayLike union: {args}"
-        )
-
-    def test_runtime_and_type_union_agree(self):
-        """is_array_like() must accept exactly the same objects as ArrayLike
-        claims at the type level — no silent divergence."""
-        from typing import get_args
-
-        from scitex_types import ArrayLike
-
-        union_members = get_args(ArrayLike)
-        # Every concrete class in the union should pass is_array_like for
-        # an instance of itself.
-        from typing import List as _List
-        from typing import Tuple as _Tuple
-
-        for cls in union_members:
-            if cls is _List:
-                assert self.is_array_like([1, 2])
-            elif cls is _Tuple:
-                assert self.is_array_like((1, 2))
-            else:
-                # Construct a minimal instance for known classes; skip if not
-                # trivially constructible.
-                try:
-                    if cls.__name__ == "ndarray":
-                        instance = np.array([1])
-                    elif cls.__name__ == "Series":
-                        import pandas as pd
-
-                        instance = pd.Series([1])
-                    elif cls.__name__ == "DataFrame":
-                        import pandas as pd
-
-                        instance = pd.DataFrame({"a": [1]})
-                    elif cls.__name__ == "DataArray":
-                        import xarray as xr
-
-                        instance = xr.DataArray([1])
-                    elif cls.__name__ == "Tensor":
-                        import torch
-
-                        instance = torch.tensor([1])
-                    else:
-                        continue
-                except Exception:
-                    continue
-                assert self.is_array_like(instance), (
-                    f"is_array_like rejects {cls.__name__} which is in ArrayLike union"
-                )
-
-    def test_function_return_type(self):
-        """Test that is_array_like always returns boolean."""
-        test_objects = [[1, 2, 3], "not array", 42, np.array([1, 2]), None]
-
-        for obj in test_objects:
-            result = self.is_array_like(obj)
-            assert isinstance(result, bool), (
-                f"is_array_like({obj}) returned {type(result)}, expected bool"
-            )
-
-    def test_function_docstring(self):
-        """Test that is_array_like has proper documentation."""
-        assert self.is_array_like.__doc__ is not None
-        doc = self.is_array_like.__doc__
-        assert "array-like" in doc.lower()
-        assert "bool" in doc.lower()
-
-    def test_comprehensive_type_coverage(self):
-        """Test comprehensive coverage of array-like types."""
-        # Create test objects for all supported types if available
-        test_objects = []
-
-        # Basic Python types
-        test_objects.extend([[1, 2, 3], (1, 2, 3)])
-
-        # NumPy
-        test_objects.append(np.array([1, 2, 3]))
-
-        # Pandas
-        try:
+            return pd.Series([1])
+        if name == "DataFrame":
             import pandas as pd
 
-            test_objects.extend([pd.Series([1, 2, 3]), pd.DataFrame({"A": [1, 2, 3]})])
-        except ImportError:
-            pass
-
-        # xarray
-        try:
+            return pd.DataFrame({"a": [1]})
+        if name == "DataArray":
             import xarray as xr
 
-            test_objects.append(xr.DataArray([1, 2, 3]))
-        except ImportError:
-            pass
-
-        # torch
-        try:
+            return xr.DataArray([1])
+        if name == "Tensor":
             import torch
 
-            test_objects.append(torch.tensor([1, 2, 3]))
-        except ImportError:
-            pass
-
-        # All should be recognized as array-like
-        for obj in test_objects:
-            assert self.is_array_like(obj), (
-                f"Object {type(obj)} not recognized as array-like"
-            )
-
-    def test_performance_with_large_objects(self):
-        """Test that function performs reasonably with large objects."""
-        import time
-
-        # Large list
-        large_list = list(range(10000))
-
-        start_time = time.time()
-        result = self.is_array_like(large_list)
-        end_time = time.time()
-
-        assert result == True
-        # Should complete quickly (less than 1 second)
-        assert end_time - start_time < 1.0
-
-    def test_memory_efficiency(self):
-        """Test that function doesn't hold references to large objects."""
-        import gc
-        import weakref
-
-        # Create large object
-        large_array = np.zeros(10000)
-        weak_ref = weakref.ref(large_array)
-
-        # Test function
-        result = self.is_array_like(large_array)
-        assert result == True
-
-        # Delete original reference
-        del large_array
-        gc.collect()
-
-        # Object should be collectible (function didn't hold reference)
-        # Note: This test might be sensitive to implementation details
-        # so we just verify the function worked correctly
-        assert result == True
+            return torch.tensor([1])
+    except Exception:
+        return None
+    return None
 
 
-if __name__ == "__main__":
-    import os
+@pytest.fixture
+def union_member_instances():
+    from typing import get_args
 
-    import pytest
+    out = []
+    for cls in get_args(ArrayLike):
+        inst = _instance_for_union_member(cls)
+        if inst is not None:
+            out.append((cls, inst))
+    return out
 
-    pytest.main([os.path.abspath(__file__)])
 
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/types/_ArrayLike.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-05-01 09:21:23 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/types/_ArrayLike.py
-# # ----------------------------------------
-# import os
-#
-# __FILE__ = "./src/scitex/types/_ArrayLike.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-# from typing import List as _List
-# from typing import Tuple as _Tuple
-# from typing import Union as _Union
-#
-# import numpy as _np
-# import pandas as _pd
-# import xarray as _xr
-#
-#
-# def _get_torch_tensor_type():
-#     """Lazily import torch.Tensor to avoid circular imports."""
-#     try:
-#         import torch
-#
-#         return torch.Tensor
-#     except (ImportError, RuntimeError):
-#         # If torch is not available or has import issues, return None
-#         return type(None)
-#
-#
-# ArrayLike = _Union[
-#     _List,
-#     _Tuple,
-#     _np.ndarray,
-#     _pd.Series,
-#     _pd.DataFrame,
-#     _xr.DataArray,
-# ]
-#
-#
-# def is_array_like(obj) -> bool:
-#     """Check if object is array-like.
-#
-#     Returns:
-#         bool: True if object is array-like, False otherwise.
-#     """
-#     # First check against non-torch types
-#     is_standard_array = isinstance(
-#         obj,
-#         (_List, _Tuple, _np.ndarray, _pd.Series, _pd.DataFrame, _xr.DataArray),
-#     )
-#
-#     if is_standard_array:
-#         return True
-#
-#     # Check torch tensor lazily to avoid circular imports
-#     try:
-#         import torch
-#
-#         return torch.is_tensor(obj)
-#     except (ImportError, RuntimeError):
-#         return False
-#
-#
-# # EOF
+def test_every_union_member_instance_is_array_like(union_member_instances):
+    # Arrange
+    failures = []
+    # Act
+    for cls, inst in union_member_instances:
+        if not is_array_like(inst):
+            failures.append(cls)
+    # Assert
+    assert not failures, f"is_array_like rejects union members: {failures}"
 
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/types/_ArrayLike.py
-# --------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Return-type and docstring contracts
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "obj",
+    [[1, 2, 3], "not array", 42, np.array([1, 2]), None],
+)
+def test_is_array_like_returns_bool(obj):
+    # Arrange
+    # Act
+    result = is_array_like(obj)
+    # Assert
+    assert isinstance(result, bool)
+
+
+def test_is_array_like_has_docstring():
+    # Arrange
+    # Act
+    doc = is_array_like.__doc__
+    # Assert
+    assert doc is not None
+
+
+def test_is_array_like_docstring_mentions_array_like():
+    # Arrange
+    doc = is_array_like.__doc__ or ""
+    # Act
+    # Assert
+    assert "array-like" in doc.lower()
+
+
+def test_is_array_like_docstring_mentions_bool():
+    # Arrange
+    doc = is_array_like.__doc__ or ""
+    # Act
+    # Assert
+    assert "bool" in doc.lower()
+
+
+# ---------------------------------------------------------------------------
+# Performance / memory smoke tests
+# ---------------------------------------------------------------------------
+
+
+def test_is_array_like_large_list_completes_quickly():
+    # Arrange
+    import time
+
+    large_list = list(range(10000))
+    # Act
+    start = time.time()
+    result = is_array_like(large_list)
+    elapsed = time.time() - start
+    # Assert
+    assert result and elapsed < 1.0
+
+
+def test_is_array_like_large_numpy_array_returns_true():
+    # Arrange
+    large_array = np.zeros(10000)
+    # Act
+    result = is_array_like(large_array)
+    # Assert
+    assert result is True

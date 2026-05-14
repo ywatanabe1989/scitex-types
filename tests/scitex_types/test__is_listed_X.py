@@ -1,21 +1,8 @@
 #!/usr/bin/env python3
-# Timestamp: "2025-05-30 14:00:00 (claude)"
 # File: ./tests/scitex/types/test__is_listed_X.py
 # ----------------------------------------
 
-"""
-Comprehensive test suite for scitex_types._is_listed_X module.
-
-This module tests the is_listed_X function which validates whether an object
-is a list where all elements are of specified types.
-
-Test Structure:
-- Basic functionality tests
-- Type validation tests
-- Edge case handling
-- Error handling and robustness
-- Performance considerations
-"""
+"""Tests for scitex_types._is_listed_X module."""
 
 import pytest
 
@@ -25,378 +12,724 @@ np = pytest.importorskip("numpy")
 
 from scitex_types._is_listed_X import is_list_of_type, is_listed_X
 
+# ===========================================================================
+# is_listed_X — basic callability / API surface
+# ===========================================================================
 
-class TestIsListedX:
-    """Test cases for the is_listed_X function."""
-
-    def test_function_exists(self):
-        """Test that the is_listed_X function exists and is callable."""
-        assert callable(is_listed_X), "is_listed_X should be callable"
-
-    def test_simple_integer_list(self):
-        """Test with simple integer list."""
-        obj = [1, 2, 3, 4, 5]
-        assert is_listed_X(obj, int) == True
-
-    def test_simple_string_list(self):
-        """Test with simple string list."""
-        obj = ["a", "b", "c"]
-        assert is_listed_X(obj, str) == True
-
-    def test_simple_float_list(self):
-        """Test with simple float list."""
-        obj = [1.0, 2.5, 3.14]
-        assert is_listed_X(obj, float) == True
-
-    def test_mixed_type_list_single_type(self):
-        """Test mixed type list against single type (should fail)."""
-        obj = [1, "a", 3.0]
-        assert is_listed_X(obj, int) == False
-        assert is_listed_X(obj, str) == False
-        assert is_listed_X(obj, float) == False
-
-    def test_multiple_allowed_types_tuple(self):
-        """Test with multiple allowed types as tuple."""
-        # All integers - should work with tuple containing int
-        obj = [1, 2, 3]
-        assert is_listed_X(obj, (int, float)) == True
-
-        # All floats - should work with tuple containing float
-        obj = [1.0, 2.5, 3.14]
-        assert is_listed_X(obj, (int, float)) == True
-
-        # Mixed types - should fail because not all elements are the same type
-        obj = [1, 2.5, 3]
-        assert is_listed_X(obj, (int, float)) == False
-
-    def test_multiple_allowed_types_list(self):
-        """Test with multiple allowed types as list."""
-        # All integers - should work with list containing int
-        obj = [1, 2, 3]
-        assert is_listed_X(obj, [int, float]) == True
-
-        # All floats - should work with list containing float
-        obj = [1.0, 2.5, 3.14]
-        assert is_listed_X(obj, [int, float]) == True
-
-        # Mixed types - should fail because not all elements are the same type
-        obj = [1, 2.5, 3]
-        assert is_listed_X(obj, [int, float]) == False
-
-    def test_empty_list(self):
-        """Test with empty list."""
-        obj = []
-        # Empty list should return True for any type since all elements satisfy condition
-        assert is_listed_X(obj, int) == True
-        assert is_listed_X(obj, str) == True
-        assert is_listed_X(obj, (int, float)) == True
-
-    def test_non_list_objects(self):
-        """Test with non-list objects."""
-        assert is_listed_X("not a list", int) == False
-        assert is_listed_X(123, int) == False
-        assert is_listed_X({"a": 1}, int) == False
-        assert is_listed_X((1, 2, 3), int) == False  # tuple, not list
-        assert is_listed_X(np.array([1, 2, 3]), int) == False  # numpy array, not list
-
-    def test_nested_lists(self):
-        """Test with nested lists."""
-        obj = [[1, 2], [3, 4]]
-        assert is_listed_X(obj, list) == True
-        assert is_listed_X(obj, int) == False
-
-    def test_list_with_none_values(self):
-        """Test list containing None values."""
-        obj = [1, None, 3]
-        assert is_listed_X(obj, int) == False
-        # Mixed int and None - should fail because not all are same type
-        assert is_listed_X(obj, (int, type(None))) == False
-
-        # All None values - should work
-        obj = [None, None, None]
-        assert is_listed_X(obj, (int, type(None))) == True
-        assert is_listed_X(obj, type(None)) == True
-
-    def test_complex_types(self):
-        """Test with complex Python types."""
-        obj = [complex(1, 2), complex(3, 4)]
-        assert is_listed_X(obj, complex) == True
-        assert is_listed_X(obj, int) == False
-
-    def test_bool_type_inheritance(self):
-        """Test boolean type (which inherits from int in Python)."""
-        obj = [True, False, True]
-        assert is_listed_X(obj, bool) == True
-        # Note: bool is subclass of int, so this should also be True
-        assert is_listed_X(obj, int) == True
-
-    def test_numpy_types(self):
-        """Test with numpy numeric types."""
-        obj = [np.int32(1), np.int32(2), np.int32(3)]
-        assert is_listed_X(obj, np.int32) == True
-        # Test compatibility with standard int
-        assert is_listed_X(obj, int) == False  # numpy types are not standard int
-
-    def test_custom_class_instances(self):
-        """Test with custom class instances."""
-
-        class CustomClass:
-            def __init__(self, value):
-                self.value = value
-
-        obj1 = CustomClass(1)
-        obj2 = CustomClass(2)
-        obj = [obj1, obj2]
-
-        assert is_listed_X(obj, CustomClass) == True
-        assert is_listed_X(obj, int) == False
-
-    def test_exception_handling(self):
-        """Test exception handling with problematic inputs."""
-        # Test with None as obj
-        assert is_listed_X(None, int) == False
-
-        # Test with unhashable types that might cause issues
-        class ProblematicClass:
-            def __hash__(self):
-                raise TypeError("Unhashable type")
-
-        problematic_obj = ProblematicClass()
-        obj = [problematic_obj]
-
-        # Should handle exceptions gracefully
-        result = is_listed_X(obj, ProblematicClass)
-        assert isinstance(
-            result, (bool, np.bool_)
-        )  # Should return boolean, not raise exception
-
-    def test_large_list_performance(self):
-        """Test performance with large list."""
-        obj = list(range(1000))  # Large list of integers
-        assert is_listed_X(obj, int) == True
-        assert is_listed_X(obj, str) == False
-
-    def test_mixed_numeric_types(self):
-        """Test with mixed numeric types."""
-        obj = [1, 2.0, 3]
-        # Mixed int and float - should fail because not all are same type
-        assert is_listed_X(obj, (int, float)) == False
-        assert is_listed_X(obj, int) == False  # contains float
-        assert is_listed_X(obj, float) == False  # contains int
-
-        # Test all same type but with multiple allowed
-        obj = [1, 2, 3]  # all int
-        assert is_listed_X(obj, (int, float)) == True
-        obj = [1.0, 2.0, 3.0]  # all float
-        assert is_listed_X(obj, (int, float)) == True
-
-    def test_string_variations(self):
-        """Test with different string types."""
-        obj = ["hello", "world", "test"]
-        assert is_listed_X(obj, str) == True
-        assert is_listed_X(obj, bytes) == False
-
-    def test_bytes_objects(self):
-        """Test with bytes objects."""
-        obj = [b"hello", b"world"]
-        assert is_listed_X(obj, bytes) == True
-        assert is_listed_X(obj, str) == False
-
-    def test_function_objects(self):
-        """Test with function objects."""
-
-        def func1():
-            pass
-
-        def func2():
-            pass
-
-        obj = [func1, func2]
-        assert is_listed_X(obj, type(func1)) == True
-
-    def test_edge_case_single_element(self):
-        """Test with single element lists."""
-        assert is_listed_X([1], int) == True
-        assert is_listed_X([1], str) == False
-        assert is_listed_X(["a"], str) == True
-        assert is_listed_X(["a"], int) == False
-
-    def test_return_type_validation(self):
-        """Test that function always returns boolean."""
-        test_cases = [
-            ([1, 2, 3], int),
-            (["a", "b"], str),
-            ([1, "a"], int),
-            (None, int),
-            ("not_a_list", str),
-            ([], int),
-        ]
-
-        for obj, types in test_cases:
-            result = is_listed_X(obj, types)
-            assert isinstance(
-                result, (bool, np.bool_)
-            ), f"Expected bool, got {type(result)} for {obj}, {types}"
-
-    def test_docstring_examples(self):
-        """Test examples from the function's docstring."""
-        obj = [3, 2, 1, 5]
-        assert is_listed_X(obj, int) == True
-        assert is_listed_X(obj, (int, float)) == True
-        assert is_listed_X(obj, str) == False
-
-
-class TestIsListOfType:
-    """Test cases for the is_list_of_type alias function."""
-
-    def test_alias_exists_and_callable(self):
-        """Test that is_list_of_type alias exists and is callable."""
-        assert callable(is_list_of_type), "is_list_of_type should be callable"
-
-    def test_alias_matches_original_for_integers(self):
-        """Test that alias returns same result as original for integer lists."""
-        obj = [1, 2, 3, 4, 5]
-        assert is_list_of_type(obj, int) == is_listed_X(obj, int)
-        assert is_list_of_type(obj, str) == is_listed_X(obj, str)
-
-    def test_alias_matches_original_for_strings(self):
-        """Test that alias returns same result as original for string lists."""
-        obj = ["a", "b", "c"]
-        assert is_list_of_type(obj, str) == is_listed_X(obj, str)
-        assert is_list_of_type(obj, int) == is_listed_X(obj, int)
-
-    def test_alias_matches_original_for_empty_list(self):
-        """Test that alias returns same result as original for empty list."""
-        obj = []
-        assert is_list_of_type(obj, int) == is_listed_X(obj, int)
-        assert is_list_of_type(obj, str) == is_listed_X(obj, str)
-
-    def test_alias_matches_original_for_non_list(self):
-        """Test that alias returns same result as original for non-list objects."""
-        assert is_list_of_type("not a list", int) == is_listed_X("not a list", int)
-        assert is_list_of_type(123, int) == is_listed_X(123, int)
-        assert is_list_of_type(None, int) == is_listed_X(None, int)
-
-    def test_alias_matches_original_for_multiple_types(self):
-        """Test that alias returns same result for multiple allowed types."""
-        obj = [1, 2, 3]
-        assert is_list_of_type(obj, (int, float)) == is_listed_X(obj, (int, float))
-        assert is_list_of_type(obj, [int, str]) == is_listed_X(obj, [int, str])
-
-    def test_alias_basic_functionality(self):
-        """Test basic functionality of is_list_of_type independently."""
-        assert is_list_of_type([1, 2, 3], int) == True
-        assert is_list_of_type(["a", "b"], str) == True
-        assert is_list_of_type([1.0, 2.0], float) == True
-        assert is_list_of_type([1, "a"], int) == False
-
-
-class TestModuleIntegration:
-    """Test module-level integration."""
-
-    def test_functions_available_from_module(self):
-        """Test that functions are available from the types module."""
-        import scitex_types
-
-        assert hasattr(scitex_types, "is_listed_X")
-        assert hasattr(scitex_types, "is_list_of_type")
-
-    def test_functions_are_same_from_module(self):
-        """Test that imported functions are the same objects."""
-        import scitex_types
-
-        assert scitex_types.is_listed_X is is_listed_X
-        assert scitex_types.is_list_of_type is is_list_of_type
-
-    def test_module_all_exports(self):
-        """Test that functions are in __all__ exports."""
-        import scitex_types
-
-        assert "is_listed_X" in scitex_types.__all__
-        assert "is_list_of_type" in scitex_types.__all__
-
-
-if __name__ == "__main__":
-    import os
-
-    import pytest
-
-    pytest.main([os.path.abspath(__file__)])
-
-# --------------------------------------------------------------------------------
-# Start of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/types/_is_listed_X.py
-# --------------------------------------------------------------------------------
-# #!/usr/bin/env python3
-# # -*- coding: utf-8 -*-
-# # Timestamp: "2025-05-02 17:10:53 (ywatanabe)"
-# # File: /home/ywatanabe/proj/scitex_repo/src/scitex/types/_is_listed_X.py
-# # ----------------------------------------
-# import os
-#
-# __FILE__ = "./src/scitex/types/_is_listed_X.py"
-# __DIR__ = os.path.dirname(__FILE__)
-# # ----------------------------------------
-#
-#
-# def is_listed_X(obj, types):
-#     """
-#     Check if obj is a list where all elements are of one of the specified types.
-#
-#     Args:
-#         obj: Object to check
-#         types: Type or list of types to check against
-#
-#     Example:
-#         obj = [3, 2, 1, 5]
-#         is_listed_X(obj, int)  # Returns True
-#         is_listed_X(obj, (int, float))  # Returns True
-#         is_listed_X(obj, str)  # Returns False
-#
-#     Returns:
-#         bool: True if obj is a list and all elements are of one of the specified types
-#     """
-#     import numpy as np
-#
-#     try:
-#         condition_list = isinstance(obj, list)
-#
-#         if not (isinstance(types, list) or isinstance(types, tuple)):
-#             types = [types]
-#
-#         _conditions_susp = []
-#         for typ in types:
-#             _conditions_susp.append(
-#                 (np.array([isinstance(o, typ) for o in obj]) == True).all()
-#             )
-#
-#         condition_susp = np.any(_conditions_susp)
-#
-#         _is_listed_X = np.all([condition_list, condition_susp])
-#         return _is_listed_X
-#
-#     except:
-#         return False
-#
-#
-# # More conventional alias
-# def is_list_of_type(obj, types):
-#     """
-#     Check if obj is a list where all elements are of one of the specified types.
-#
-#     This is an alias for is_listed_X with a more conventional name.
-#
-#     Args:
-#         obj: Object to check
-#         types: Type or list of types to check against
-#
-#     Returns:
-#         bool: True if obj is a list and all elements are of one of the specified types
-#     """
-#     return is_listed_X(obj, types)
-#
-#
-# # EOF
-
-# --------------------------------------------------------------------------------
-# End of Source Code from: /home/ywatanabe/proj/scitex-code/src/scitex/types/_is_listed_X.py
-# --------------------------------------------------------------------------------
+
+def test_is_listed_X_function_is_callable():
+    # Arrange
+    # Act
+    callable_flag = callable(is_listed_X)
+    # Assert
+    assert callable_flag
+
+
+# ===========================================================================
+# Simple same-type lists pass
+# ===========================================================================
+
+
+def test_list_of_integers_against_int_returns_true():
+    # Arrange
+    obj = [1, 2, 3, 4, 5]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert result is True or result == True  # noqa: E712
+
+
+def test_list_of_strings_against_str_returns_true():
+    # Arrange
+    obj = ["a", "b", "c"]
+    # Act
+    result = is_listed_X(obj, str)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_floats_against_float_returns_true():
+    # Arrange
+    obj = [1.0, 2.5, 3.14]
+    # Act
+    result = is_listed_X(obj, float)
+    # Assert
+    assert bool(result) is True
+
+
+# ===========================================================================
+# Mixed-type lists fail single-type checks
+# ===========================================================================
+
+
+@pytest.mark.parametrize("typ", [int, str, float])
+def test_mixed_list_fails_each_single_type(typ):
+    # Arrange
+    obj = [1, "a", 3.0]
+    # Act
+    result = is_listed_X(obj, typ)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Tuple/list "allowed types" arg
+# ===========================================================================
+
+
+def test_all_int_passes_int_or_float_tuple():
+    # Arrange
+    obj = [1, 2, 3]
+    # Act
+    result = is_listed_X(obj, (int, float))
+    # Assert
+    assert bool(result) is True
+
+
+def test_all_float_passes_int_or_float_tuple():
+    # Arrange
+    obj = [1.0, 2.5, 3.14]
+    # Act
+    result = is_listed_X(obj, (int, float))
+    # Assert
+    assert bool(result) is True
+
+
+def test_mixed_int_float_fails_int_or_float_tuple():
+    # Arrange
+    obj = [1, 2.5, 3]
+    # Act
+    result = is_listed_X(obj, (int, float))
+    # Assert
+    assert bool(result) is False
+
+
+def test_all_int_passes_int_or_float_list():
+    # Arrange
+    obj = [1, 2, 3]
+    # Act
+    result = is_listed_X(obj, [int, float])
+    # Assert
+    assert bool(result) is True
+
+
+def test_all_float_passes_int_or_float_list():
+    # Arrange
+    obj = [1.0, 2.5, 3.14]
+    # Act
+    result = is_listed_X(obj, [int, float])
+    # Assert
+    assert bool(result) is True
+
+
+def test_mixed_int_float_fails_int_or_float_list():
+    # Arrange
+    obj = [1, 2.5, 3]
+    # Act
+    result = is_listed_X(obj, [int, float])
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Empty list — vacuously true for any type
+# ===========================================================================
+
+
+def test_empty_list_passes_int():
+    # Arrange
+    obj = []
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is True
+
+
+def test_empty_list_passes_str():
+    # Arrange
+    obj = []
+    # Act
+    result = is_listed_X(obj, str)
+    # Assert
+    assert bool(result) is True
+
+
+def test_empty_list_passes_int_or_float_tuple():
+    # Arrange
+    obj = []
+    # Act
+    result = is_listed_X(obj, (int, float))
+    # Assert
+    assert bool(result) is True
+
+
+# ===========================================================================
+# Non-list inputs always fail
+# ===========================================================================
+
+
+@pytest.mark.parametrize(
+    "obj",
+    [
+        "not a list",
+        123,
+        {"a": 1},
+        (1, 2, 3),
+        np.array([1, 2, 3]),
+    ],
+)
+def test_non_list_object_returns_false(obj):
+    # Arrange
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Nested lists
+# ===========================================================================
+
+
+def test_list_of_lists_against_list_type_returns_true():
+    # Arrange
+    obj = [[1, 2], [3, 4]]
+    # Act
+    result = is_listed_X(obj, list)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_lists_against_int_type_returns_false():
+    # Arrange
+    obj = [[1, 2], [3, 4]]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# None values
+# ===========================================================================
+
+
+def test_list_with_none_against_int_returns_false():
+    # Arrange
+    obj = [1, None, 3]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is False
+
+
+def test_mixed_int_and_none_fails_int_or_none_tuple():
+    # Arrange
+    obj = [1, None, 3]
+    # Act
+    result = is_listed_X(obj, (int, type(None)))
+    # Assert
+    assert bool(result) is False
+
+
+def test_all_none_passes_int_or_none_tuple():
+    # Arrange
+    obj = [None, None, None]
+    # Act
+    result = is_listed_X(obj, (int, type(None)))
+    # Assert
+    assert bool(result) is True
+
+
+def test_all_none_passes_none_type():
+    # Arrange
+    obj = [None, None, None]
+    # Act
+    result = is_listed_X(obj, type(None))
+    # Assert
+    assert bool(result) is True
+
+
+# ===========================================================================
+# Complex / bool / numpy types
+# ===========================================================================
+
+
+def test_list_of_complex_passes_complex_type():
+    # Arrange
+    obj = [complex(1, 2), complex(3, 4)]
+    # Act
+    result = is_listed_X(obj, complex)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_complex_fails_int_type():
+    # Arrange
+    obj = [complex(1, 2), complex(3, 4)]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is False
+
+
+def test_list_of_bool_passes_bool_type():
+    # Arrange
+    obj = [True, False, True]
+    # Act
+    result = is_listed_X(obj, bool)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_bool_passes_int_type_via_inheritance():
+    # Arrange
+    obj = [True, False, True]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_np_int32_passes_np_int32_type():
+    # Arrange
+    obj = [np.int32(1), np.int32(2), np.int32(3)]
+    # Act
+    result = is_listed_X(obj, np.int32)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_np_int32_fails_python_int_type():
+    # Arrange
+    obj = [np.int32(1), np.int32(2), np.int32(3)]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Custom class instances
+# ===========================================================================
+
+
+class _CustomClass:
+    def __init__(self, value):
+        self.value = value
+
+
+def test_list_of_custom_instances_passes_custom_class():
+    # Arrange
+    obj = [_CustomClass(1), _CustomClass(2)]
+    # Act
+    result = is_listed_X(obj, _CustomClass)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_custom_instances_fails_int_type():
+    # Arrange
+    obj = [_CustomClass(1), _CustomClass(2)]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Exception handling
+# ===========================================================================
+
+
+def test_none_input_returns_false():
+    # Arrange
+    # Act
+    result = is_listed_X(None, int)
+    # Assert
+    assert bool(result) is False
+
+
+def test_problematic_class_does_not_raise():
+    # Arrange
+    class ProblematicClass:
+        def __hash__(self):
+            raise TypeError("Unhashable type")
+
+    obj = [ProblematicClass()]
+    # Act
+    result = is_listed_X(obj, ProblematicClass)
+    # Assert
+    assert isinstance(result, (bool, np.bool_))
+
+
+# ===========================================================================
+# Large list performance
+# ===========================================================================
+
+
+def test_large_int_list_passes_int_type():
+    # Arrange
+    obj = list(range(1000))
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is True
+
+
+def test_large_int_list_fails_str_type():
+    # Arrange
+    obj = list(range(1000))
+    # Act
+    result = is_listed_X(obj, str)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Strings vs bytes
+# ===========================================================================
+
+
+def test_list_of_strings_fails_bytes_type():
+    # Arrange
+    obj = ["hello", "world", "test"]
+    # Act
+    result = is_listed_X(obj, bytes)
+    # Assert
+    assert bool(result) is False
+
+
+def test_list_of_bytes_passes_bytes_type():
+    # Arrange
+    obj = [b"hello", b"world"]
+    # Act
+    result = is_listed_X(obj, bytes)
+    # Assert
+    assert bool(result) is True
+
+
+def test_list_of_bytes_fails_str_type():
+    # Arrange
+    obj = [b"hello", b"world"]
+    # Act
+    result = is_listed_X(obj, str)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Function objects
+# ===========================================================================
+
+
+def test_list_of_functions_passes_function_type():
+    # Arrange
+    def func1():
+        pass
+
+    def func2():
+        pass
+
+    obj = [func1, func2]
+    # Act
+    result = is_listed_X(obj, type(func1))
+    # Assert
+    assert bool(result) is True
+
+
+# ===========================================================================
+# Single-element edge cases
+# ===========================================================================
+
+
+def test_single_int_list_passes_int():
+    # Arrange
+    # Act
+    result = is_listed_X([1], int)
+    # Assert
+    assert bool(result) is True
+
+
+def test_single_int_list_fails_str():
+    # Arrange
+    # Act
+    result = is_listed_X([1], str)
+    # Assert
+    assert bool(result) is False
+
+
+def test_single_string_list_passes_str():
+    # Arrange
+    # Act
+    result = is_listed_X(["a"], str)
+    # Assert
+    assert bool(result) is True
+
+
+def test_single_string_list_fails_int():
+    # Arrange
+    # Act
+    result = is_listed_X(["a"], int)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Return type is always boolean-ish
+# ===========================================================================
+
+
+@pytest.mark.parametrize(
+    "obj, types",
+    [
+        ([1, 2, 3], int),
+        (["a", "b"], str),
+        ([1, "a"], int),
+        (None, int),
+        ("not_a_list", str),
+        ([], int),
+    ],
+)
+def test_return_type_is_boolean_for_each_input(obj, types):
+    # Arrange
+    # Act
+    result = is_listed_X(obj, types)
+    # Assert
+    assert isinstance(result, (bool, np.bool_))
+
+
+# ===========================================================================
+# Docstring examples
+# ===========================================================================
+
+
+def test_docstring_example_passes_int():
+    # Arrange
+    obj = [3, 2, 1, 5]
+    # Act
+    result = is_listed_X(obj, int)
+    # Assert
+    assert bool(result) is True
+
+
+def test_docstring_example_passes_int_or_float():
+    # Arrange
+    obj = [3, 2, 1, 5]
+    # Act
+    result = is_listed_X(obj, (int, float))
+    # Assert
+    assert bool(result) is True
+
+
+def test_docstring_example_fails_str():
+    # Arrange
+    obj = [3, 2, 1, 5]
+    # Act
+    result = is_listed_X(obj, str)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# is_list_of_type alias
+# ===========================================================================
+
+
+def test_is_list_of_type_alias_is_callable():
+    # Arrange
+    # Act
+    callable_flag = callable(is_list_of_type)
+    # Assert
+    assert callable_flag
+
+
+def test_alias_int_list_matches_original():
+    # Arrange
+    obj = [1, 2, 3, 4, 5]
+    # Act
+    matches = is_list_of_type(obj, int) == is_listed_X(obj, int)
+    # Assert
+    assert matches
+
+
+def test_alias_int_list_str_check_matches_original():
+    # Arrange
+    obj = [1, 2, 3, 4, 5]
+    # Act
+    matches = is_list_of_type(obj, str) == is_listed_X(obj, str)
+    # Assert
+    assert matches
+
+
+def test_alias_str_list_str_check_matches_original():
+    # Arrange
+    obj = ["a", "b", "c"]
+    # Act
+    matches = is_list_of_type(obj, str) == is_listed_X(obj, str)
+    # Assert
+    assert matches
+
+
+def test_alias_str_list_int_check_matches_original():
+    # Arrange
+    obj = ["a", "b", "c"]
+    # Act
+    matches = is_list_of_type(obj, int) == is_listed_X(obj, int)
+    # Assert
+    assert matches
+
+
+def test_alias_empty_list_int_matches_original():
+    # Arrange
+    # Act
+    matches = is_list_of_type([], int) == is_listed_X([], int)
+    # Assert
+    assert matches
+
+
+def test_alias_empty_list_str_matches_original():
+    # Arrange
+    # Act
+    matches = is_list_of_type([], str) == is_listed_X([], str)
+    # Assert
+    assert matches
+
+
+def test_alias_non_list_string_input_matches_original():
+    # Arrange
+    # Act
+    matches = is_list_of_type("not a list", int) == is_listed_X("not a list", int)
+    # Assert
+    assert matches
+
+
+def test_alias_non_list_int_input_matches_original():
+    # Arrange
+    # Act
+    matches = is_list_of_type(123, int) == is_listed_X(123, int)
+    # Assert
+    assert matches
+
+
+def test_alias_none_input_matches_original():
+    # Arrange
+    # Act
+    matches = is_list_of_type(None, int) == is_listed_X(None, int)
+    # Assert
+    assert matches
+
+
+def test_alias_int_float_tuple_matches_original():
+    # Arrange
+    obj = [1, 2, 3]
+    # Act
+    matches = is_list_of_type(obj, (int, float)) == is_listed_X(obj, (int, float))
+    # Assert
+    assert matches
+
+
+def test_alias_int_str_list_matches_original():
+    # Arrange
+    obj = [1, 2, 3]
+    # Act
+    matches = is_list_of_type(obj, [int, str]) == is_listed_X(obj, [int, str])
+    # Assert
+    assert matches
+
+
+def test_alias_int_list_basic_returns_true():
+    # Arrange
+    # Act
+    result = is_list_of_type([1, 2, 3], int)
+    # Assert
+    assert bool(result) is True
+
+
+def test_alias_string_list_basic_returns_true():
+    # Arrange
+    # Act
+    result = is_list_of_type(["a", "b"], str)
+    # Assert
+    assert bool(result) is True
+
+
+def test_alias_float_list_basic_returns_true():
+    # Arrange
+    # Act
+    result = is_list_of_type([1.0, 2.0], float)
+    # Assert
+    assert bool(result) is True
+
+
+def test_alias_mixed_list_fails_single_type():
+    # Arrange
+    # Act
+    result = is_list_of_type([1, "a"], int)
+    # Assert
+    assert bool(result) is False
+
+
+# ===========================================================================
+# Module-level integration
+# ===========================================================================
+
+
+def test_scitex_types_module_exposes_is_listed_X():
+    # Arrange
+    import scitex_types
+
+    # Act
+    has_attr = hasattr(scitex_types, "is_listed_X")
+    # Assert
+    assert has_attr
+
+
+def test_scitex_types_module_exposes_is_list_of_type():
+    # Arrange
+    import scitex_types
+
+    # Act
+    has_attr = hasattr(scitex_types, "is_list_of_type")
+    # Assert
+    assert has_attr
+
+
+def test_module_is_listed_X_is_same_object():
+    # Arrange
+    import scitex_types
+
+    # Act
+    same = scitex_types.is_listed_X is is_listed_X
+    # Assert
+    assert same
+
+
+def test_module_is_list_of_type_is_same_object():
+    # Arrange
+    import scitex_types
+
+    # Act
+    same = scitex_types.is_list_of_type is is_list_of_type
+    # Assert
+    assert same
+
+
+def test_is_listed_X_listed_in_module_all():
+    # Arrange
+    import scitex_types
+
+    # Act
+    is_in_all = "is_listed_X" in scitex_types.__all__
+    # Assert
+    assert is_in_all
+
+
+def test_is_list_of_type_listed_in_module_all():
+    # Arrange
+    import scitex_types
+
+    # Act
+    is_in_all = "is_list_of_type" in scitex_types.__all__
+    # Assert
+    assert is_in_all

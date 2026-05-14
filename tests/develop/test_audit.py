@@ -9,12 +9,23 @@ import shutil
 import pytest
 
 
-def test_audit_all_clean():
+@pytest.fixture
+def scitex_dev_cli_or_skip():
     if shutil.which("scitex-dev") is None:
         pytest.skip(
             "scitex-dev not installed — add `scitex-dev[cli-audit]` "
             "to [project.optional-dependencies.dev]"
         )
+    return shutil.which("scitex-dev")
+
+
+def test_audit_all_reports_no_violations_for_package(scitex_dev_cli_or_skip):
+    # Arrange
     from scitex_dev.testing import audit_all_for_package
 
-    audit_all_for_package('scitex-types')
+    completed_without_error = False
+    # Act
+    audit_all_for_package("scitex-types")
+    completed_without_error = True
+    # Assert
+    assert completed_without_error
