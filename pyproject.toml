@@ -23,44 +23,39 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    # `scitex_dev.try_import_optional` is used by `_ArrayLike` to gate the
-    # optional numpy/pandas/xarray/torch members of the ArrayLike union; the
-    # helper is in scitex-dev's light core (no heavy transitive imports).
+    # Tier 1 (hard) — required for the package's only public surface
+    # (Python API + skills entry-point) to work out of `pip install
+    # scitex-types`. `scitex_dev.try_import_optional` is used by
+    # `_ArrayLike` to gate the optional numpy/pandas/xarray/torch
+    # members of the ArrayLike union; the helper lives in scitex-dev's
+    # light core (no heavy transitive imports).
     "scitex-dev",
 ]
 
 [project.optional-dependencies]
-numpy = [
+# Tier 2 — `pip install scitex-types[all]` enables every
+# graceful-degradation feature. Each library widens the `ArrayLike`
+# union and unlocks the matching `is_array_like()` runtime check.
+all = [
     "numpy",
-]
-pandas = [
     "pandas",
-]
-torch = [
     "torch",
-]
-xarray = [
     "xarray",
 ]
+
+# Tier 3 — maintainer-only tools (tests + docs build). Does not
+# duplicate `scitex-dev` (already hard) and does not include the
+# `[all]` array libraries (install with `.[all,dev]` for the full
+# matrix). nbconvert/openpyxl are intentionally absent — scitex-types
+# has no notebook tests or xlsx fixtures.
 dev = [
-    "numpy",
     "pytest",
     "pytest-cov",
-    "scitex-dev>=0.11.7",
-    "xarray",
-]
-docs = [
     "sphinx>=7.0",
     "sphinx-rtd-theme>=2.0",
     "myst-parser>=2.0",
     "sphinx-copybutton>=0.5",
     "sphinx-autodoc-typehints>=1.25",
-]
-all = [
-    "scitex-types[numpy]",
-    "scitex-types[pandas]",
-    "scitex-types[torch]",
-    "scitex-types[xarray]",
 ]
 
 [project.urls]

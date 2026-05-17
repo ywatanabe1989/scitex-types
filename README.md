@@ -59,8 +59,7 @@ flowchart LR
 
 ```bash
 pip install scitex-types
-# Optional extras:
-pip install scitex-types[numpy,pandas]
+# Optional: enable array-library matches (numpy + pandas + torch + xarray):
 pip install scitex-types[all]
 ```
 

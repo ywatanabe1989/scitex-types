@@ -6,7 +6,7 @@
 
 import pytest
 
-# numpy is an optional extra (scitex-types[numpy]), so guard at module-import
+# numpy is an optional extra (scitex-types[all]), so guard at module-import
 # time (PA-303). Skips the whole file if numpy isn't installed.
 np = pytest.importorskip("numpy")
 

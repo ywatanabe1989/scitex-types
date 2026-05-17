@@ -21,16 +21,16 @@ from typing import Union as _Union
 
 from scitex_dev import try_import_optional
 
-_np = try_import_optional("numpy", extra="numpy", pkg="scitex-types")
+_np = try_import_optional("numpy", extra="all", pkg="scitex-types")
 NUMPY_AVAILABLE = _np is not None
 
-_pd = try_import_optional("pandas", extra="pandas", pkg="scitex-types")
+_pd = try_import_optional("pandas", extra="all", pkg="scitex-types")
 PANDAS_AVAILABLE = _pd is not None
 
-_xr = try_import_optional("xarray", extra="xarray", pkg="scitex-types")
+_xr = try_import_optional("xarray", extra="all", pkg="scitex-types")
 XARRAY_AVAILABLE = _xr is not None
 
-_torch = try_import_optional("torch", extra="torch", pkg="scitex-types")
+_torch = try_import_optional("torch", extra="all", pkg="scitex-types")
 TORCH_AVAILABLE = _torch is not None
 
 
