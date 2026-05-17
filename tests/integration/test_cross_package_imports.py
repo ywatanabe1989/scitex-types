@@ -19,7 +19,11 @@ CROSS_PACKAGE_IMPORTS: list[str] = [
 ]
 
 
-def test_cross_package_imports_resolve() -> None:
+def test_cross_package_imports_resolve_at_runtime() -> None:
     """Every declared cross-package import must be importable at test time."""
-    for name in CROSS_PACKAGE_IMPORTS:
-        importlib.import_module(name)
+    # Arrange
+    names = CROSS_PACKAGE_IMPORTS
+    # Act
+    resolved = [importlib.import_module(name) for name in names]
+    # Assert
+    assert len(resolved) == len(names)
