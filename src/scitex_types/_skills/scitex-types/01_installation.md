@@ -19,17 +19,19 @@ match those types).
 
 ## Optional extras
 
-| Extra     | Adds      | Why                                              |
-|-----------|-----------|--------------------------------------------------|
-| `numpy`   | numpy     | enable `is_array_like(np.ndarray)` matches       |
-| `pandas`  | pandas    | enable matches against `DataFrame` / `Series`    |
-| `torch`   | torch     | enable matches against `torch.Tensor`            |
-| `xarray`  | xarray    | enable matches against `xarray.DataArray`        |
-| `all`     | all above |                                                  |
+Per the ecosystem-wide three-tier dependency policy, scitex-types
+exposes a single fully-featured extra plus a maintainer-only `dev`
+extra. Fragmented `[numpy] [pandas] [torch] [xarray]` extras were
+collapsed into `[all]` — install the full matrix in one go.
+
+| Extra   | Adds                                | Why                                                                                       |
+|---------|-------------------------------------|-------------------------------------------------------------------------------------------|
+| `all`   | numpy + pandas + torch + xarray     | widen `ArrayLike`, enable `is_array_like()` matches against every supported array library |
+| `dev`   | pytest, pytest-cov, sphinx toolchain| maintainer-only — tests + docs build                                                      |
 
 ```bash
-pip install 'scitex-types[numpy,pandas]'
-pip install 'scitex-types[all]'
+pip install 'scitex-types[all]'           # consumer: full feature set
+pip install -e '.[all,dev]'               # maintainer: tests + docs + arrays
 ```
 
 ## Verify
