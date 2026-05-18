@@ -16,8 +16,6 @@ interfaces:
 
 # scitex-types
 
-> **Interfaces:** Python ⭐⭐⭐ (primary) · CLI — · MCP — · Skills ⭐ · Hook — · HTTP —
-
 Small type-support package for the SciTeX ecosystem. Provides array-ish and
 color-ish type aliases plus runtime predicates to check container uniformity.
 

@@ -2,15 +2,15 @@
 """scitex-types: Scientific type definitions and validation."""
 
 from __future__ import annotations
+
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _v
+
 try:
-    from importlib.metadata import version as _v, PackageNotFoundError
-    try:
-        __version__ = _v("scitex-types")
-    except PackageNotFoundError:
-        __version__ = "0.0.0+local"
-    del _v, PackageNotFoundError
-except ImportError:  # pragma: no cover — only on ancient Pythons
+    __version__ = _v("scitex-types")
+except PackageNotFoundError:
     __version__ = "0.0.0+local"
+del _v, PackageNotFoundError
 
 from ._ArrayLike import ArrayLike, is_array_like
 from ._ColorLike import ColorLike

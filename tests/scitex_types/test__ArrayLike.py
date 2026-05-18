@@ -6,32 +6,25 @@
 
 import pytest
 
-# numpy is an optional extra (scitex-types[numpy]), so guard at module-import
-# time (PA-303). Skips the whole file if the user isn't installing [dev].
+# numpy is an optional extra (scitex-types[all]), so guard at module-import
+# time (PA-303). Skips the whole file if the user isn't installing [all].
 np = pytest.importorskip("numpy")
 
 from scitex_types import ArrayLike, is_array_like  # noqa: E402
 
 
 def _require_pandas():
-    try:
-        import pandas as pd  # noqa: F401
-    except ImportError:
-        pytest.skip("Pandas not available")
+    # `pytest.importorskip` is the auditor-friendly form (PS-210). It
+    # skips the test when the optional `[all]` extra dep is missing.
+    pytest.importorskip("pandas")
 
 
 def _require_xarray():
-    try:
-        import xarray as xr  # noqa: F401
-    except ImportError:
-        pytest.skip("xarray not available")
+    pytest.importorskip("xarray")
 
 
 def _require_torch():
-    try:
-        import torch  # noqa: F401
-    except ImportError:
-        pytest.skip("PyTorch not available")
+    pytest.importorskip("torch")
 
 
 # ---------------------------------------------------------------------------

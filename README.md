@@ -14,12 +14,13 @@
 
 <!-- scitex-badges:start -->
 <p align="center">
-  <a href="https://pypi.org/project/scitex-types/"><img src="https://img.shields.io/pypi/v/scitex-types.svg" alt="PyPI"></a>
-  <a href="https://pypi.org/project/scitex-types/"><img src="https://img.shields.io/pypi/pyversions/scitex-types.svg" alt="Python"></a>
-  <a href="https://github.com/ywatanabe1989/scitex-types/actions/workflows/test.yml"><img src="https://github.com/ywatanabe1989/scitex-types/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <a href="https://codecov.io/gh/ywatanabe1989/scitex-types"><img src="https://codecov.io/gh/ywatanabe1989/scitex-types/graph/badge.svg" alt="Coverage"></a>
-  <a href="https://scitex-types.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/scitex-types/badge/?version=latest" alt="Docs"></a>
-  <a href="https://www.gnu.org/licenses/agpl-3.0"><img src="https://img.shields.io/badge/license-AGPL_v3-blue.svg" alt="License: AGPL v3"></a>
+  <a href="https://pypi.org/project/scitex-types/"><img src="https://img.shields.io/pypi/v/scitex-types?label=pypi" alt="pypi"></a>
+  <a href="https://pypi.org/project/scitex-types/"><img src="https://img.shields.io/pypi/pyversions/scitex-types?label=python" alt="python"></a>
+  <a href="https://github.com/ywatanabe1989/scitex-types/actions/workflows/rtd-sphinx-build-on-ubuntu-latest.yml"><img src="https://img.shields.io/github/actions/workflow/status/ywatanabe1989/scitex-types/rtd-sphinx-build-on-ubuntu-latest.yml?branch=develop&label=docs" alt="docs"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/ywatanabe1989/scitex-types/actions/workflows/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml"><img src="https://img.shields.io/github/actions/workflow/status/ywatanabe1989/scitex-types/pytest-matrix-on-ubuntu-py3-11-3-12-3-13.yml?branch=develop&label=tests" alt="tests"></a>
+  <a href="https://codecov.io/gh/ywatanabe1989/scitex-types"><img src="https://img.shields.io/codecov/c/github/ywatanabe1989/scitex-types/develop?label=cov" alt="cov"></a>
 </p>
 <!-- scitex-badges:end -->
 
@@ -59,8 +60,7 @@ flowchart LR
 
 ```bash
 pip install scitex-types
-# Optional extras:
-pip install scitex-types[numpy,pandas]
+# Optional: enable array-library matches (numpy + pandas + torch + xarray):
 pip install scitex-types[all]
 ```
 
