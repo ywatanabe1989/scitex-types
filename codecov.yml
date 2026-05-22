@@ -1,8 +1,10 @@
-# Coverage / Codecov configuration for scitex-types.
-#
-# `auto` lets Codecov use the previous coverage as the baseline while the
-# package ramps coverage up to the ecosystem-wide 90% target. Flip to
-# `90%` once the local baseline is comfortably above it.
+codecov:
+  require_ci_to_pass: false
+  # Treat develop as the de-facto default branch — main is a stable
+  # release mirror that only fast-forwards from develop, so develop
+  # is where coverage uploads land. This makes the unbranched badge
+  # endpoint (/graph/badge.svg) follow develop's value.
+  branch: develop
 
 coverage:
   status:
@@ -12,7 +14,16 @@ coverage:
         threshold: 1%
     patch:
       default:
-        target: auto
-        threshold: 1%
+        target: 80%
 
-comment: false
+ignore:
+  - "src/scitex_types/_sphinx_html/**"
+  - "src/scitex_types/_skills/**"
+  - "src/scitex_types/_completion.py"
+  - "src/scitex_types/_cli/_completion.py"
+  - "tests/**"
+  - "examples/**"
+
+comment:
+  layout: "diff, files"
+  require_changes: true
