@@ -37,8 +37,9 @@
 
 ```
 scitex_types/
-├── _aliases.py     # ArrayLike, ColorLike unions
-└── _predicates.py  # is_array_like, is_list_of_type
+├── _ArrayLike.py     # ArrayLike type + is_array_like predicate
+├── _ColorLike.py     # ColorLike type
+└── _is_listed_X.py   # is_list_of_type + is_listed_X predicates
 ```
 
 ```mermaid
