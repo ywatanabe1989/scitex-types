@@ -15,6 +15,7 @@ del _v, PackageNotFoundError
 from ._ArrayLike import ArrayLike, is_array_like
 from ._ColorLike import ColorLike
 from ._is_listed_X import is_list_of_type, is_listed_X
+from ._var_info import var_info
 
 __all__ = [
     "__version__",
@@ -23,4 +24,5 @@ __all__ = [
     "is_array_like",
     "is_list_of_type",
     "is_listed_X",
+    "var_info",
 ]
