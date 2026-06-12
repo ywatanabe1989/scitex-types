@@ -33,6 +33,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+docs = [
+    "sphinx>=7",
+    "sphinx-rtd-theme",
+]
+
 # Tier 2 — `pip install scitex-types[all]` enables every
 # graceful-degradation feature. Each library widens the `ArrayLike`
 # union and unlocks the matching `is_array_like()` runtime check.
