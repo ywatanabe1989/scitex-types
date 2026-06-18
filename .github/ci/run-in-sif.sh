@@ -50,4 +50,13 @@ export PATH="$VENV/bin:$PATH"
 export PYTHONPATH="$PWD/src"
 
 echo "py=$("$VENV"/bin/python -V) pytest=$(command -v pytest)"
-exec pytest tests/ --cov=src/scitex_types --cov-report=xml --cov-report=term
+
+# Parallelise with pytest-xdist (baked into the SIF via scitex-dev[all,dev]'s
+# pytest-xdist>=3). Use ALL logical cores on the lease node — the operator
+# directive for ecosystem CI is full $(nproc), always. --dist loadscope keeps
+# each test class/module on one worker so per-module fixtures aren't rebuilt
+# across workers. Each xdist worker is a separate PROCESS, so any module-global
+# state is naturally isolated per worker.
+NPROC="$(nproc 2>/dev/null || echo 1)"
+echo "xdist workers=$NPROC (all cores)"
+exec pytest tests/ -n "$NPROC" --dist loadscope --cov=src/scitex_types --cov-report=xml --cov-report=term
